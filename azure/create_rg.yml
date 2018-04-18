@@ -1,7 +1,0 @@
----
-- hosts: localhost
-  tasks:
-  - name: createing rg
-    azure_rm_resourcegroup:
-      name: demorgj
-      location: westeurope
