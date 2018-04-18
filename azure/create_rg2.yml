@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+
+  vars_prompt:
+  - name: "rg"
+    prompt: "RG Name"
+    private: no 	
+  - name: "location"
+    prompt: "Localizacion"
+    private: no
+  
+  tasks:
+  - name: creating rg
+    azure_rm_resourcegroup:
+      name: "{{rg}}"
+      location: "{{ location }}"

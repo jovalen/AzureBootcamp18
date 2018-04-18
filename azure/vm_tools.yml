@@ -1,0 +1,16 @@
+- name: Install the package "foo"
+  apt:
+    name: apt-transport-https
+    state: present
+- name: Add an apt key by id from a keyserver
+  apt_key:
+    keyserver: packages.microsoft.com
+    id: 52E16F86FEE04B979B07E28DB02C46DF417A0893
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+- name: Install the package "foo"
+  apt:
+    name: azure-cli
+    state: present
+

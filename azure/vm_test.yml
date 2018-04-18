@@ -1,0 +1,85 @@
+- name: Azure Bootcamp Madrid.  Este playbook me crea una VM lista para utilizar Service Fabric
+  hosts: localhost
+  connection: local
+  vars_prompt:
+  - name: "rg"
+    prompt: "Nombre RG"
+    private: no
+  - name: "vmname"
+    prompt: "Nombre VM"    
+    private: no
+
+
+#- name: Create Azure VM
+#  hosts: localhost
+#  connection: local
+#  tasks:
+  tasks:
+  - name: Creamos una Vnet
+    azure_rm_virtualnetwork:
+      resource_group: "{{ rg }}"
+      name: testvm001
+      address_prefixes: "10.10.0.0/16"
+
+  - name: Add subnet
+    azure_rm_subnet:
+      resource_group: "{{ rg }}"
+      name: testvm001
+      address_prefix: "10.10.0.0/24"
+      virtual_network: testvm001
+
+  - name: Cremos una apublic ip
+    azure_rm_publicipaddress:
+      resource_group: "{{ rg }}"
+      allocation_method: Dynamic
+      name: testvm001
+
+  - name: Cremos un asecurity group
+    azure_rm_securitygroup:
+      resource_group: "{{ rg }}"
+      name: testvm001
+      rules: 
+        - name: ServiceFabric 
+          protocol: Tcp 
+          destination_port_range: 19080  
+          access: Allow  
+          priority: 101 
+          direction: Inbound
+        - name: SSH
+          protocol: Tcp
+          destination_port_range: 22
+          access: Allow
+          priority: 103
+          direction: Inbound
+        - name: WEB
+          protocol: Tcp 
+          destination_port_range: 80  
+          access: Allow  
+          priority: 102 
+          direction: Inbound
+
+  - name: Creamos una NIC
+    azure_rm_networkinterface:
+      resource_group: "{{ rg }}"
+      name: testvm001
+      virtual_network: testvm001
+      subnet: testvm001
+      public_ip_name: testvm001
+      security_group: testvm001
+
+  - name: Y ahora vamos a por la VM!!!!
+    azure_rm_virtualmachine:
+      resource_group: "{{ rg }}"
+      name: "{{ vmname }}"
+      vm_size: Standard_D2s_v3
+      managed_disk_type: Standard_LRS
+      admin_username: jovalen
+      ssh_password_enabled: yes
+      admin_password: "@zureb00t@zureb00t"
+      network_interfaces: testvm001
+      image:
+        offer: UbuntuServer
+        publisher: Canonical
+        sku: '16.04-LTS'
+        version: latest
+
